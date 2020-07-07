@@ -29,8 +29,6 @@ fn put_piece(board: &mut Board, pieces: &[Piece], index: usize, end: usize) -> b
         for i in (0..board::SIZE - bottom).step_by(2) {
             for j in (0..board::SIZE - right).step_by(2) {
                 if board.put(piece, i, j, state) {
-                    // remove_piece(board, i, j, i + bottom, j + right, piece.color);
-                    // return true;
                     // if index > 5 {
                     //     board.print();
                     //     println!("{}", index);
@@ -38,12 +36,10 @@ fn put_piece(board: &mut Board, pieces: &[Piece], index: usize, end: usize) -> b
                     if index == end {
                         return true;
                     }
-                    let put_all = put_piece(board, pieces, index + 1, end);
-                    if put_all {
+                    if put_piece(board, pieces, index + 1, end) {
                         return true;
                     } else {
-                        //remove_piece(board, i, j, i + bottom, j + right, piece.color);
-                        remove_piece_1(board, piece.color);
+                        remove_piece(board, i, j, i + bottom, j + right, piece.color);
                     }
                 }
             }
@@ -62,54 +58,5 @@ fn remove_piece(board: &mut Board, si: usize, sj: usize, ei: usize, ej: usize, c
     }
 }
 
-fn remove_piece_1(board: &mut Board, color: u32) {
-    for i in 0..board::SIZE {
-        for j in 0..board::SIZE {
-            if get!(board.data, i, j) == color {
-                set!(board.data, i, j, 0);
-            }
-        }
-    }
-}
-
-// 0..0 -> 4.1µs        4
-// 0..1 -> 168.4216ms   168000
-//                      x15
-// 0..2 -> 2.5868068s   2600000
-//                      x6.5
-// 0..3 -> 17.7953124s  17000000
-//                      x4.7
-// 0..4 -> 80.2822031s  80000000
-//                      x1.9
-// 0..5 -> 149.868599s  150000000
-//                      x2.07
-// 0..6 -> 311.1525722s 311000000
-//                      x2.2
-// 0..7 ->              (684s)
-//                      x2.5
-// 0..8 -> 617.4269947s 617000000
-//
-/////////////////////////////////
-// v2
-//
-// 1 -> 2s
-//                      x34
-// 2 -> 68s
-//                      x9
-// 3 -> 613s
-//                      x3
-// 4 ->
-//                      x
-// 5 ->
-//                      x
-// 6 ->
-//                      x
-// 7 ->
-//                      x
-// 8 -> 24953s
-
-// 0..1    +optimized -> 52s
-// 0..1   ++optimized -> 51, 46, 48, 52s
-// 0..1  +++optimized -> 44, 42, 42, 50, 49, 50
-// 0..1 ++++optimized -> 44s
-// 0..1    -optimized -> 60s
+// 0..1 all -> 50s
+// 0..1 sec -> 40s (apps closed)
