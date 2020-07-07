@@ -46,7 +46,7 @@ impl fmt::Display for Piece {
         let c = std::char::from_digit(self.color, 10).unwrap();
         for row in self.data.iter() {
             for b in row {
-                f.write_char(if *b { c } else { ' ' })?;
+                f.write_char(if *b { c } else { '.' })?;
             }
             f.write_char('\n')?;
         }

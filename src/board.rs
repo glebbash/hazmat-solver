@@ -1,4 +1,5 @@
 use crate::piece::Piece;
+use crate::{get, set};
 
 pub const SIZE: usize = 24;
 
@@ -15,76 +16,204 @@ impl Board {
         }
     }
 
-    fn set(&mut self, i: usize, j: usize, color: u32) -> bool {
-        if self.data[i][j] != 0 {
-            false
+    pub fn put(&mut self, piece: &Piece, pos_i: usize, pos_j: usize, state: u8) -> bool {
+        let rot90 = state > 3;
+        let max_i = piece.height - 1;
+        let max_j = piece.width - 1;
+        let flip_i = match state {
+            0 | 1 | 4 | 5 => false,
+            _ => true,
+        };
+        let flip_j = match state {
+            0 | 3 | 4 | 6 => false,
+            _ => true,
+        };
+        if rot90 {
+            if flip_i {
+                if flip_j {
+                    for i in 0..=max_i {
+                        for j in 0..=max_j {
+                            if get!(piece.data, max_i - i, max_j - j) {
+                                if get!(self.data, j + pos_i, i + pos_j) != 0 {
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                    for i in 0..=max_i {
+                        for j in 0..=max_j {
+                            if get!(piece.data, max_i - i, max_j - j) {
+                                set!(self.data, j + pos_i, i + pos_j, piece.color);
+                            }
+                        }
+                    }
+                } else {
+                    for i in 0..=max_i {
+                        for j in 0..=max_j {
+                            if get!(piece.data, max_i - i, j) {
+                                if get!(self.data, j + pos_i, i + pos_j) != 0 {
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                    for i in 0..=max_i {
+                        for j in 0..=max_j {
+                            if get!(piece.data, max_i - i, j) {
+                                set!(self.data, j + pos_i, i + pos_j, piece.color);
+                            }
+                        }
+                    }
+                }
+            } else {
+                if flip_j {
+                    for i in 0..=max_i {
+                        for j in 0..=max_j {
+                            if get!(piece.data, i, max_j - j) {
+                                if get!(self.data, j + pos_i, i + pos_j) != 0 {
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                    for i in 0..=max_i {
+                        for j in 0..=max_j {
+                            if get!(piece.data, i, max_j - j) {
+                                set!(self.data, j + pos_i, i + pos_j, piece.color);
+                            }
+                        }
+                    }
+                } else {
+                    for i in 0..=max_i {
+                        for j in 0..=max_j {
+                            if get!(piece.data, i, j) {
+                                if get!(self.data, j + pos_i, i + pos_j) != 0 {
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                    for i in 0..=max_i {
+                        for j in 0..=max_j {
+                            if get!(piece.data, i, j) {
+                                set!(self.data, j + pos_i, i + pos_j, piece.color);
+                            }
+                        }
+                    }
+                }
+            }
         } else {
-            self.data[i][j] = color;
-            true
+            if flip_i {
+                if flip_j {
+                    for i in 0..=max_i {
+                        for j in 0..=max_j {
+                            if get!(piece.data, max_i - i, max_j - j) {
+                                if get!(self.data, i + pos_i, j + pos_j) != 0 {
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                    for i in 0..=max_i {
+                        for j in 0..=max_j {
+                            if get!(piece.data, max_i - i, max_j - j) {
+                                set!(self.data, i + pos_i, j + pos_j, piece.color);
+                            }
+                        }
+                    }
+                } else {
+                    for i in 0..=max_i {
+                        for j in 0..=max_j {
+                            if get!(piece.data, max_i - i, j) {
+                                if get!(self.data, i + pos_i, j + pos_j) != 0 {
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                    for i in 0..=max_i {
+                        for j in 0..=max_j {
+                            if get!(piece.data, max_i - i, j) {
+                                set!(self.data, i + pos_i, j + pos_j, piece.color);
+                            }
+                        }
+                    }
+                }
+            } else {
+                if flip_j {
+                    for i in 0..=max_i {
+                        for j in 0..=max_j {
+                            if get!(piece.data, i, max_j - j) {
+                                if get!(self.data, i + pos_i, j + pos_j) != 0 {
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                    for i in 0..=max_i {
+                        for j in 0..=max_j {
+                            if get!(piece.data, i, max_j - j) {
+                                set!(self.data, i + pos_i, j + pos_j, piece.color);
+                            }
+                        }
+                    }
+                } else {
+                    for i in 0..=max_i {
+                        for j in 0..=max_j {
+                            if get!(piece.data, i, j) {
+                                if get!(self.data, i + pos_i, j + pos_j) != 0 {
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                    for i in 0..=max_i {
+                        for j in 0..=max_j {
+                            if get!(piece.data, i, j) {
+                                set!(self.data, i + pos_i, j + pos_j, piece.color);
+                            }
+                        }
+                    }
+                }
+            }
         }
-    }
+        // // not optimized
+        //
+        // // check loop
+        // for i in 0..=max_i {
+        //     for j in 0..=max_j {
+        //         let piece_i = if flip_i { max_i - i } else { i };
+        //         let piece_j = if flip_j { max_j - j } else { j };
 
-    pub fn put(&mut self, piece: &Piece, pos: (usize, usize), state: u8) -> bool {
-        if state < 4 {
-            if pos.0 + piece.height >= SIZE || pos.1 + piece.width >= SIZE {
-                return false;
-            }
-            let i_range: Box<dyn Iterator<Item = _>> = if state == 0 || state == 1 {
-                Box::new((0..piece.height).zip(0..piece.height))
-            } else {
-                Box::new((0..piece.height).zip((0..piece.height).rev()))
-            };
-            for (i, piece_i) in i_range {
-                let j_range: Box<dyn Iterator<Item = _>> = if state == 0 || state == 3 {
-                    Box::new((0..piece.width).zip(0..piece.width))
-                } else {
-                    Box::new((0..piece.width).zip((0..piece.width).rev()))
-                };
-                for (j, piece_j) in j_range {
-                    if piece.data[piece_i][piece_j] {
-                        if !self.set(i + pos.0, j + pos.1, piece.color) {
-                            self.remove(piece.color);
-                            return false
-                        }
-                    }
-                }
-            }
-        } else {
-            if pos.0 + piece.width >= SIZE || pos.1 + piece.height >= SIZE {
-                return false;
-            }
-            let i_range: Box<dyn Iterator<Item = _>> = if state == 4 || state == 5 {
-                Box::new((0..piece.height).zip(0..piece.height))
-            } else {
-                Box::new((0..piece.height).zip((0..piece.height).rev()))
-            };
-            for (i, piece_i) in i_range {
-                let j_range: Box<dyn Iterator<Item = _>> = if state == 4 || state == 6 {
-                    Box::new((0..piece.width).zip(0..piece.width))
-                } else {
-                    Box::new((0..piece.width).zip((0..piece.width).rev()))
-                };
-                for (j, piece_j) in j_range {
-                    if piece.data[piece_i][piece_j] {
-                        if !self.set(j + pos.0, i + pos.1, piece.color) {
-                            self.remove(piece.color);
-                            return false
-                        }
-                    }
-                }
-            }
-        }
+        //         if get!(piece.data, piece_i, piece_j) {
+        //             if rot90 {
+        //                 if get!(self.data, j + pos_i, i + pos_j] != 0 {
+        //                     return false;
+        //                 }
+        //             } else if get!(self.data, i + pos_i, j + pos_j] != 0 {
+        //                 return false;
+        //             }
+        //         }
+        //     }
+        // }
+        // // fill loop
+        // for i in 0..=max_i {
+        //     for j in 0..=max_j {
+        //         let piece_i = if flip_i { max_i - i } else { i };
+        //         let piece_j = if flip_j { max_j - j } else { j };
+
+        //         if get!(piece.data, piece_i, piece_j) {
+        //             if rot90 {
+        //                 set!(self.data, j + pos_i, i + pos_j], piece.color);
+        //             } else {
+        //                 set!(self.data, i + pos_i, j + pos_j, piece.color);
+        //             }
+        //         }
+        //     }
+        // }
         true
     }
-    pub fn remove(&mut self, color: u32) {
-        for i in 0..SIZE {
-            for j in 0..SIZE {
-                if self.data[i][j] == color {
-                    self.data[i][j] = 0;
-                }
-            }
-        }
-    }
+
     pub fn print(&self) {
         for row in &self.data {
             for piece in row {
@@ -99,19 +228,5 @@ impl Board {
             }
             print!("\n")
         }
-    }
-}
-
-impl std::ops::Index<(usize, usize)> for Board {
-    type Output = u32;
-
-    fn index(&self, pos: (usize, usize)) -> &Self::Output {
-        &self.data[pos.0][pos.1]
-    }
-}
-
-impl std::ops::IndexMut<(usize, usize)> for Board {
-    fn index_mut(&mut self, pos: (usize, usize)) -> &mut Self::Output {
-        &mut self.data[pos.0][pos.1]
     }
 }
