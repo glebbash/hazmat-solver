@@ -4,15 +4,18 @@ use std::fs::File;
 use std::io;
 use std::io::prelude::*;
 
+//type Data = Vec<bool>;
+type Data = Vec<Vec<bool>>;
+
 pub struct Piece {
     pub width: usize,
     pub height: usize,
-    pub data: Vec<bool>,
+    pub data: Data,
     pub color: u32,
 }
 
 impl Piece {
-    pub fn new(width: usize, height: usize, data: Vec<bool>, color: u32) -> Self {
+    pub fn new(width: usize, height: usize, data: Data, color: u32) -> Self {
         Piece {
             width,
             height,
@@ -25,26 +28,23 @@ impl Piece {
         let f = File::open(format!("data/{}.piece", color))?;
 
         let mut data = vec![];
-        let mut width = 0;
-        let mut height = 1;
-        let mut i = 0;
+        let mut row = vec![];
 
         for c in f.bytes().map(|b| b.unwrap() as char) {
             if c == '\n' {
-                width = i;
-                height += 1;
-                i = 0;
+                data.push(row);
+                row = vec![];
             } else {
-                data.push(c != ' ');
+                row.push(c != ' ');
             }
-            i += 1;
         }
+        data.push(row);
 
-        Ok(Piece::new(width - 1, height, data, color))
+        Ok(Piece::new(data[0].len(), data.len(), data, color))
     }
 
     pub fn get(&self, i: usize, j: usize) -> bool {
-        unsafe { *self.data.get_unchecked(self.width * i + j) }
+        unsafe { *self.data.get_unchecked(i).get_unchecked(j) }
     }
 }
 

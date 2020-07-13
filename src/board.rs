@@ -1,5 +1,7 @@
 use crate::piece::Piece;
 use crate::{get, set};
+use ansi_term::Colour::*;
+use std::fmt;
 
 pub const SIZE: usize = 24;
 
@@ -16,25 +18,24 @@ impl Board {
         }
     }
 
-    pub fn put(&mut self, piece: &Piece, pos_i: usize, pos_j: usize, state: u8) -> bool {
-        let rot90 = state > 3;
-        let max_i = piece.height - 1;
-        let max_j = piece.width - 1;
-        let flip_i = match state {
-            0 | 1 | 4 | 5 => false,
-            _ => true,
-        };
-        let flip_j = match state {
-            0 | 3 | 4 | 6 => false,
-            _ => true,
-        };
+    pub fn put(
+        &mut self,
+        piece: &Piece,
+        pos_i: usize,
+        pos_j: usize,
+        max_i: usize,
+        max_j: usize,
+        flip_i: bool,
+        flip_j: bool,
+        rot90: bool,
+    ) -> bool {
         if rot90 {
             if flip_i {
                 if flip_j {
                     for i in 0..=max_i {
                         for j in 0..=max_j {
-                            if get!(piece.data, max_i - i, max_j - j) {
-                                if get!(self.data, j + pos_i, i + pos_j) != 0 {
+                            if piece.get(max_i - i, max_j - j) {
+                                if self.get(j + pos_i, i + pos_j) != 0 {
                                     return false;
                                 }
                             }
@@ -42,16 +43,16 @@ impl Board {
                     }
                     for i in 0..=max_i {
                         for j in 0..=max_j {
-                            if get!(piece.data, max_i - i, max_j - j) {
-                                set!(self.data, j + pos_i, i + pos_j, piece.color);
+                            if piece.get(max_i - i, max_j - j) {
+                                self.set(j + pos_i, i + pos_j, piece.color);
                             }
                         }
                     }
                 } else {
                     for i in 0..=max_i {
                         for j in 0..=max_j {
-                            if get!(piece.data, max_i - i, j) {
-                                if get!(self.data, j + pos_i, i + pos_j) != 0 {
+                            if piece.get(max_i - i, j) {
+                                if self.get(j + pos_i, i + pos_j) != 0 {
                                     return false;
                                 }
                             }
@@ -59,8 +60,8 @@ impl Board {
                     }
                     for i in 0..=max_i {
                         for j in 0..=max_j {
-                            if get!(piece.data, max_i - i, j) {
-                                set!(self.data, j + pos_i, i + pos_j, piece.color);
+                            if piece.get(max_i - i, j) {
+                                self.set(j + pos_i, i + pos_j, piece.color);
                             }
                         }
                     }
@@ -69,8 +70,8 @@ impl Board {
                 if flip_j {
                     for i in 0..=max_i {
                         for j in 0..=max_j {
-                            if get!(piece.data, i, max_j - j) {
-                                if get!(self.data, j + pos_i, i + pos_j) != 0 {
+                            if piece.get(i, max_j - j) {
+                                if self.get(j + pos_i, i + pos_j) != 0 {
                                     return false;
                                 }
                             }
@@ -78,16 +79,16 @@ impl Board {
                     }
                     for i in 0..=max_i {
                         for j in 0..=max_j {
-                            if get!(piece.data, i, max_j - j) {
-                                set!(self.data, j + pos_i, i + pos_j, piece.color);
+                            if piece.get(i, max_j - j) {
+                                self.set(j + pos_i, i + pos_j, piece.color);
                             }
                         }
                     }
                 } else {
                     for i in 0..=max_i {
                         for j in 0..=max_j {
-                            if get!(piece.data, i, j) {
-                                if get!(self.data, j + pos_i, i + pos_j) != 0 {
+                            if piece.get(i, j) {
+                                if self.get(j + pos_i, i + pos_j) != 0 {
                                     return false;
                                 }
                             }
@@ -95,8 +96,8 @@ impl Board {
                     }
                     for i in 0..=max_i {
                         for j in 0..=max_j {
-                            if get!(piece.data, i, j) {
-                                set!(self.data, j + pos_i, i + pos_j, piece.color);
+                            if piece.get(i, j) {
+                                self.set(j + pos_i, i + pos_j, piece.color);
                             }
                         }
                     }
@@ -107,8 +108,8 @@ impl Board {
                 if flip_j {
                     for i in 0..=max_i {
                         for j in 0..=max_j {
-                            if get!(piece.data, max_i - i, max_j - j) {
-                                if get!(self.data, i + pos_i, j + pos_j) != 0 {
+                            if piece.get(max_i - i, max_j - j) {
+                                if self.get(i + pos_i, j + pos_j) != 0 {
                                     return false;
                                 }
                             }
@@ -116,16 +117,16 @@ impl Board {
                     }
                     for i in 0..=max_i {
                         for j in 0..=max_j {
-                            if get!(piece.data, max_i - i, max_j - j) {
-                                set!(self.data, i + pos_i, j + pos_j, piece.color);
+                            if piece.get(max_i - i, max_j - j) {
+                                self.set(i + pos_i, j + pos_j, piece.color);
                             }
                         }
                     }
                 } else {
                     for i in 0..=max_i {
                         for j in 0..=max_j {
-                            if get!(piece.data, max_i - i, j) {
-                                if get!(self.data, i + pos_i, j + pos_j) != 0 {
+                            if piece.get(max_i - i, j) {
+                                if self.get(i + pos_i, j + pos_j) != 0 {
                                     return false;
                                 }
                             }
@@ -133,8 +134,8 @@ impl Board {
                     }
                     for i in 0..=max_i {
                         for j in 0..=max_j {
-                            if get!(piece.data, max_i - i, j) {
-                                set!(self.data, i + pos_i, j + pos_j, piece.color);
+                            if piece.get(max_i - i, j) {
+                                self.set(i + pos_i, j + pos_j, piece.color);
                             }
                         }
                     }
@@ -143,8 +144,8 @@ impl Board {
                 if flip_j {
                     for i in 0..=max_i {
                         for j in 0..=max_j {
-                            if get!(piece.data, i, max_j - j) {
-                                if get!(self.data, i + pos_i, j + pos_j) != 0 {
+                            if piece.get(i, max_j - j) {
+                                if self.get(i + pos_i, j + pos_j) != 0 {
                                     return false;
                                 }
                             }
@@ -152,16 +153,16 @@ impl Board {
                     }
                     for i in 0..=max_i {
                         for j in 0..=max_j {
-                            if get!(piece.data, i, max_j - j) {
-                                set!(self.data, i + pos_i, j + pos_j, piece.color);
+                            if piece.get(i, max_j - j) {
+                                self.set(i + pos_i, j + pos_j, piece.color);
                             }
                         }
                     }
                 } else {
                     for i in 0..=max_i {
                         for j in 0..=max_j {
-                            if get!(piece.data, i, j) {
-                                if get!(self.data, i + pos_i, j + pos_j) != 0 {
+                            if piece.get(i, j) {
+                                if self.get(i + pos_i, j + pos_j) != 0 {
                                     return false;
                                 }
                             }
@@ -169,64 +170,55 @@ impl Board {
                     }
                     for i in 0..=max_i {
                         for j in 0..=max_j {
-                            if get!(piece.data, i, j) {
-                                set!(self.data, i + pos_i, j + pos_j, piece.color);
+                            if piece.get(i, j) {
+                                self.set(i + pos_i, j + pos_j, piece.color);
                             }
                         }
                     }
                 }
             }
         }
-        // // not optimized
-        //
-        // // check loop
-        // for i in 0..=max_i {
-        //     for j in 0..=max_j {
-        //         let piece_i = if flip_i { max_i - i } else { i };
-        //         let piece_j = if flip_j { max_j - j } else { j };
-
-        //         if get!(piece.data, piece_i, piece_j) {
-        //             if rot90 {
-        //                 if get!(self.data, j + pos_i, i + pos_j] != 0 {
-        //                     return false;
-        //                 }
-        //             } else if get!(self.data, i + pos_i, j + pos_j] != 0 {
-        //                 return false;
-        //             }
-        //         }
-        //     }
-        // }
-        // // fill loop
-        // for i in 0..=max_i {
-        //     for j in 0..=max_j {
-        //         let piece_i = if flip_i { max_i - i } else { i };
-        //         let piece_j = if flip_j { max_j - j } else { j };
-
-        //         if get!(piece.data, piece_i, piece_j) {
-        //             if rot90 {
-        //                 set!(self.data, j + pos_i, i + pos_j], piece.color);
-        //             } else {
-        //                 set!(self.data, i + pos_i, j + pos_j, piece.color);
-        //             }
-        //         }
-        //     }
-        // }
         true
     }
 
-    pub fn print(&self) {
+    pub fn get(&self, i: usize, j: usize) -> u32 {
+        get!(self.data, i, j)
+    }
+
+    pub fn set(&mut self, i: usize, j: usize, color: u32) {
+        set!(self.data, i, j, color);
+    }
+}
+
+fn empty() -> String {
+    " ".to_string()
+    //Black.on(Black).paint(".").to_string()
+}
+
+fn display(color: u32) -> String {
+    //std::char::from_digit(color, 10).unwrap().to_string()
+    match color {
+        1 => Blue.on(Blue).paint(" ").to_string(),
+        _ => " ".to_string(),
+    }
+}
+
+impl fmt::Display for Board {
+    fn fmt(&self, out: &mut fmt::Formatter<'_>) -> fmt::Result {
         for row in &self.data {
             for piece in row {
-                print!(
+                write!(
+                    out,
                     "{}",
                     if *piece == 0 {
-                        '.'
+                        empty()
                     } else {
-                        std::char::from_digit(*piece, 10).unwrap()
+                        display(*piece)
                     }
-                )
+                )?;
             }
-            print!("\n")
+            write!(out, "\n")?;
         }
+        Ok(())
     }
 }
